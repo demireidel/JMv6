@@ -4,9 +4,10 @@ interface GlassCardProps {
   children: React.ReactNode;
   className?: string;
   as?: React.ElementType;
+  [key: string]: unknown;
 }
 
-export function GlassCard({ children, className, as: Tag = "div" }: GlassCardProps) {
+export function GlassCard({ children, className, as: Tag = "div", ...rest }: GlassCardProps) {
   return (
     <Tag
       className={cn(
@@ -15,6 +16,7 @@ export function GlassCard({ children, className, as: Tag = "div" }: GlassCardPro
         "hover:bg-white/[0.06] hover:border-white/[0.14]",
         className
       )}
+      {...rest}
     >
       {children}
     </Tag>
