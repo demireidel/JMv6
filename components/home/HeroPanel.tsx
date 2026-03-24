@@ -37,7 +37,7 @@ export function HeroPanel() {
           className="text-7xl md:text-9xl font-black leading-none mb-6"
           withAccent={false}
         >
-          JAVIER<br />MILEI
+          JAVIER{" "}<br />MILEI
         </SectionHeading>
         <p className="text-text/70 font-sans text-xl md:text-2xl font-light max-w-2xl mx-auto">
           El camino hacia la Argentina más libre del mundo
