@@ -33,19 +33,32 @@ The site is purely informational (prestige). No newsletter, no donation, no logi
 
 ### Rendering Strategy
 
-| Route | Strategy | Rationale |
-|---|---|---|
-| `/` | SSG + Cache Components (PPR) | Cinematic, static, instant load |
-| `/logros` | ISR — 1hr revalidation | Content updates occasionally |
-| `/reformas` | SSG | Rarely changes |
-| `/reformas/[slug]` | SSG + `generateStaticParams` | Pre-render all reforms at build |
-| `/vision`, `/mundo`, `/futuro` | SSG | Near-static content |
-| `/archivo` | ISR — 24hr revalidation | Speeches/interviews added infrequently |
+With `cacheComponents: true` enabled, `"use cache"` + `cacheLife` profiles replace ISR's `export const revalidate`. Do **not** mix both — use `"use cache"` exclusively.
+
+| Route | Strategy | `cacheLife` profile | Rationale |
+|---|---|---|---|
+| `/` | SSG + Cache Components | `'max'` | Cinematic, static, instant load |
+| `/logros` | Cache Components | `'hours'` | Content updates occasionally |
+| `/reformas` | SSG / Cache Components | `'max'` | Rarely changes |
+| `/reformas/[slug]` | SSG via `generateStaticParams` | n/a (build-time static) | Pre-render all reform paths at build; data loaders use `"use cache"` with `cacheLife('max')` for any dynamic fallback |
+| `/vision`, `/mundo`, `/futuro` | SSG / Cache Components | `'max'` | Near-static content |
+| `/archivo` | Cache Components | `'days'` | Speeches/interviews added infrequently |
+
+```ts
+// Example data loader — lib/data/logros.ts
+"use cache";
+import { cacheLife } from "next/cache";
+
+export async function getLogros() {
+  cacheLife("hours");
+  return import("@/content/logros.json");
+}
+```
 
 ### Next.js 16 Specifics
 - **Turbopack** as default bundler (2–5× faster builds, 10× faster Fast Refresh)
 - **`"use cache"` directive** on all data-fetching functions — opt-in caching
-- **`proxy.ts`** replaces `middleware.ts` for any redirect/rewrite logic
+- **`proxy.ts`** replaces `middleware.ts` for any redirect/rewrite logic (Next.js 16 feature — see [official announcement](https://nextjs.org/blog/next-16#proxyts-formerly-middlewarets); runs on Node.js runtime, export function named `proxy`)
 - **React Compiler** enabled — automatic memoization, no manual `useMemo`/`useCallback`
 - **View Transitions API** (`<ViewTransition>`) for cinematic page-to-page navigation
 - **Layout deduplication + incremental prefetching** — automatic via Next.js 16
@@ -165,14 +178,28 @@ bg-emerald-950/20 backdrop-blur-xl border border-emerald-900/20 rounded-xl
 
 **Sticky floating nav:** glassmorphism pill, 7 dot anchors + section labels on hover.
 
+**Panel 4 scroll conflict resolution:** Panel 4 (Reformas) uses horizontal card scrolling inside a vertical `scroll-snap-type: y mandatory` container. To avoid scroll interception:
+- Desktop (≥1024px): render reform cards as a 3-column CSS grid — no horizontal scroll needed, no conflict.
+- Mobile (<1024px): horizontal scroll via `overflow-x: auto; -webkit-overflow-scrolling: touch` inside the panel. The `scroll-snap` on the y-axis snaps between full-viewport panels; within a panel, touch-horizontal scrolling is a separate scroll axis and does not conflict.
+
+---
+
+### `/vision` — Visión
+
+- **Hero:** Full-bleed dark cinematic panel, Playfair Display 800 title: *"La Argentina más libre del mundo"*
+- **Manifiesto:** 3–4 paragraph statement of Milei's governing philosophy — liberty, minimal state, sound money
+- **4 Pilares:** glassmorphism cards — Libertad Económica / Reducción del Estado / Moneda Sana / Seguridad Jurídica
+- **Línea de tiempo:** Before 2023 → Transición → Visión 2027 — horizontal timeline with gold milestones
+- Rendering: SSG / Cache Components (`cacheLife('max')`)
+
 ---
 
 ### `/logros` — Achievements
 
 - **Hero stat bar:** 4 headline numbers with animated counters (IntersectionObserver trigger)
 - **Timeline:** chronological milestones, gold vertical line, alternating left/right cards
-- **Category filter tabs:** Economía / Seguridad / Educación / Infraestructura — client component, URL search param for shareability
-- Rendering: ISR 1hr
+- **Category filter tabs:** Economía / Seguridad / Educación / Infraestructura — client component. Filtering is purely client-side (no server re-render). URL search param (`?categoria=economia`) is written client-side via `useSearchParams` + `router.replace` for shareability. The page pre-renders all items; the client reads the param on mount and applies filtering. **Known trade-off:** users arriving via a filtered URL will see an unfiltered flash before hydration. This is accepted — the flash is ~100ms and the page is informational. To minimise it, all items should be rendered in the DOM but non-matching items hidden via CSS `display: none` (not unmounted), so there is no layout shift on reveal.
+- Rendering: Cache Components — `cacheLife('hours')`
 
 ---
 
@@ -201,6 +228,7 @@ All pre-rendered via `generateStaticParams` from `/content/reformas/*.mdx`.
 - **Mercosur-UE:** milestone timeline
 - **Alianza EEUU:** key highlights
 - **International press:** logo strip (SVG logos, grayscale → gold on hover)
+- **World map:** Use `react-simple-maps` with a GeoJSON world file. Connection lines from Buenos Aires to Davos, Brussels, Washington DC rendered as `<Line>` elements with CSS `stroke-dasharray` + `stroke-dashoffset` animation (glow effect via SVG `filter: blur`). Coordinates: BA `[-58.4, -34.6]`, Davos `[9.8, 46.8]`, Brussels `[4.3, 50.8]`, Washington `[-77.0, 38.9]`. Map is a static Server Component (no interactivity needed).
 - Rendering: SSG
 
 ---
@@ -222,24 +250,28 @@ Three tabs: **Discursos** / **Entrevistas** / **Libros**
 
 **Libros tab — Milei's 12 published books (Spanish originals):**
 
-| # | Título | Año | Cover (Amazon CDN) |
+Amazon cover URL pattern: `https://m.media-amazon.com/images/I/{id}._AC_SX300_.jpg`
+
+| # | Título | Año | Cover URL |
 |---|---|---|---|
-| 1 | Capitalismo, socialismo y la trampa neoclásica | 2023 | `81+L6UZrd+L` |
-| 2 | El camino del libertario | 2022 | `819yHRUhKjL` |
-| 3 | El fin de la inflación | 2022 | `71acWh9bKVL` |
-| 4 | La economía en una lección | 2021 | `715BZ10iz-L` |
-| 5 | Desenmascarando la mentira keynesiana | 2021 | `611R2-0ViCL` |
-| 6 | Libertad, libertad, libertad | 2020 | `81bEVnipzqL` |
-| 7 | Pandenomics | 2020 | `91IE6TOp9+L` |
-| 8 | El retorno al sendero de la decadencia argentina | 2020 | `51AHGxgqk1L` |
-| 9 | Relatos de un progre | 2018 | `81KOH9ehxPL` |
-| 10 | Maquinita, Infleta y Devaluta | 2017 | `71rAdWTGH4L` |
-| 11 | Política económica contra reloj | 2015 | `61Th72vcKrL` |
-| 12 | Lecturas de economía en tiempos del kirchnerismo | 2014 | `911gi22wzZL` |
+| 1 | Capitalismo, socialismo y la trampa neoclásica | 2023 | `https://m.media-amazon.com/images/I/81+L6UZrd+L._AC_SX300_.jpg` |
+| 2 | El camino del libertario | 2022 | `https://m.media-amazon.com/images/I/819yHRUhKjL._AC_SX300_.jpg` |
+| 3 | El fin de la inflación | 2022 | `https://m.media-amazon.com/images/I/71acWh9bKVL._AC_SX300_.jpg` |
+| 4 | La economía en una lección | 2021 | `https://m.media-amazon.com/images/I/715BZ10iz-L._AC_SX300_.jpg` |
+| 5 | Desenmascarando la mentira keynesiana | 2021 | `https://m.media-amazon.com/images/I/611R2-0ViCL._AC_SX300_.jpg` |
+| 6 | Libertad, libertad, libertad | 2020 | `https://m.media-amazon.com/images/I/81bEVnipzqL._AC_SX300_.jpg` |
+| 7 | Pandenomics | 2020 | `https://m.media-amazon.com/images/I/91IE6TOp9+L._AC_SX300_.jpg` |
+| 8 | El retorno al sendero de la decadencia argentina | 2020 | `https://m.media-amazon.com/images/I/51AHGxgqk1L._AC_SX300_.jpg` |
+| 9 | Relatos de un progre | 2018 | `https://m.media-amazon.com/images/I/81KOH9ehxPL._AC_SX300_.jpg` |
+| 10 | Maquinita, Infleta y Devaluta | 2017 | `https://m.media-amazon.com/images/I/71rAdWTGH4L._AC_SX300_.jpg` |
+| 11 | Política económica contra reloj | 2015 | `https://m.media-amazon.com/images/I/61Th72vcKrL._AC_SX300_.jpg` |
+| 12 | Lecturas de economía en tiempos del kirchnerismo | 2014 | `https://m.media-amazon.com/images/I/911gi22wzZL._AC_SX300_.jpg` |
 
-Layout: horizontal scroll strip on mobile, 4-column masonry grid on desktop. Each card: `next/image` cover + glassmorphism title overlay on hover + year badge. Covers sourced from `m.media-amazon.com` CDN, configured in `next.config.ts` under `images.remotePatterns`.
+`libros.json` stores each entry with `title`, `year`, and `coverUrl` (full URL). `next.config.ts` includes `m.media-amazon.com` in `images.remotePatterns`.
 
-Rendering: ISR 24hr
+Layout: horizontal scroll strip on mobile, 4-column grid on desktop. Each card: `next/image` cover + glassmorphism title overlay on hover + year badge.
+
+Rendering: Cache Components — `cacheLife('days')`
 
 ---
 
@@ -255,10 +287,18 @@ No database or CMS. All content as local files in the repo.
   logros.json           ← stats array + timeline items
   mundo.json            ← events, press logo list
   futuro.json           ← AI pillars, roadmap items
-  libros.json           ← 12 books: title, year, amazonId, amazonCoverUrl
+  libros.json           ← 12 books: `{ title: string, year: number, coverUrl: string }[]`
 ```
 
-All data-fetching functions use the `"use cache"` directive (Next.js 16 Cache Components).
+All data-fetching functions use the `"use cache"` directive with `cacheLife` profiles (Next.js 16 Cache Components). No `export const revalidate` — use `"use cache"` exclusively.
+
+**MDX processing:** Use `next-mdx-remote` with the App Router (`next-mdx-remote/rsc`). Add `remark-gfm` for tables/strikethrough. No `@next/mdx` (limited to static imports) — `next-mdx-remote` supports dynamic loading from the filesystem, required for `generateStaticParams`.
+
+```ts
+// lib/data/reformas.ts
+import { compileMDX } from "next-mdx-remote/rsc";
+import remarkGfm from "remark-gfm";
+```
 
 ---
 
@@ -305,7 +345,7 @@ Additional optimizations:
   globals.css             ← Tailwind 4 @theme tokens
 
 /components
-  /ui                     ← GlassCard, GoldButton, SectionHeading, StatCounter
+  /ui                     ← GlassCard, GoldButton, SectionHeading (shared primitives)
   /nav                    ← FloatingNav, MobileNav
   /home                   ← HeroPanel, LogrosPanel, ReformasPanel, etc.
   /reformas               ← ReformaCard, BeforeAfterPanel, ImpactoChart
