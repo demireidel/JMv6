@@ -1,4 +1,3 @@
-// components/home/LogrosHomePanel.tsx
 import Link from "next/link";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -12,34 +11,53 @@ export async function LogrosHomePanel() {
   return (
     <section
       id="logros"
-      className="h-screen flex flex-col items-center justify-center bg-surface/50 px-6"
+      className="h-screen flex flex-col items-center justify-center px-6 relative"
       aria-label="Logros"
     >
-      <ScrollReveal className="w-full max-w-6xl">
-        <SectionHeading className="text-4xl md:text-5xl text-center mb-12">
+      {/* Atmospheric background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: "linear-gradient(180deg, rgba(14,14,18,0.5) 0%, rgba(7,7,9,1) 100%)",
+        }}
+        aria-hidden="true"
+      />
+
+      <ScrollReveal className="w-full max-w-6xl relative z-10">
+        <SectionHeading className="text-4xl md:text-6xl text-center mb-4 font-light tracking-tight">
           Logros del Gobierno
         </SectionHeading>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <p className="text-muted text-sm font-sans text-center mb-14 max-w-md mx-auto">
+          Resultados concretos que transforman la economía argentina
+        </p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
           {featured.map((stat, i) => (
-            <GlassCard key={stat.label} className="p-6 text-center">
-              <ScrollReveal delay={i * 100}>
-                <p className="font-sans text-4xl font-black text-gold">
-                  {stat.value}{stat.unit}
+            <ScrollReveal key={stat.label} delay={i * 120}>
+              <GlassCard className="p-6 md:p-8 text-center relative overflow-hidden">
+                {/* Gold top edge accent */}
+                <div className="absolute top-0 left-4 right-4 h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" aria-hidden="true" />
+                <p className="font-display text-4xl md:text-5xl font-light text-gold tracking-tight">
+                  {stat.value}
+                  <span className="text-gold/60 text-2xl md:text-3xl">{stat.unit}</span>
                 </p>
-                <p className="font-sans text-sm text-muted mt-2">{stat.label}</p>
-                <p className="font-sans text-xs text-text/50 mt-1">{stat.description}</p>
-              </ScrollReveal>
-            </GlassCard>
+                <p className="font-sans text-xs text-text/70 mt-3 uppercase tracking-wider font-medium">{stat.label}</p>
+                <p className="font-sans text-[11px] text-muted mt-1">{stat.description}</p>
+              </GlassCard>
+            </ScrollReveal>
           ))}
         </div>
-        <div className="text-center">
+
+        <ScrollReveal delay={500} className="text-center">
           <Link
             href="/logros"
-            className="text-gold text-sm font-sans font-semibold uppercase tracking-widest hover:text-gold-bright transition-colors"
+            className="inline-flex items-center gap-3 group text-gold/70 text-xs font-sans font-medium uppercase tracking-[0.2em] hover:text-gold transition-colors duration-500"
           >
-            Ver todos los logros →
+            <span className="w-8 h-px bg-gold/30 group-hover:w-12 transition-all duration-500" />
+            Ver todos los logros
+            <span className="w-8 h-px bg-gold/30 group-hover:w-12 transition-all duration-500" />
           </Link>
-        </div>
+        </ScrollReveal>
       </ScrollReveal>
     </section>
   );

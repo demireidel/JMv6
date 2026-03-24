@@ -1,21 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --font-display: "Playfair Display", Georgia, serif;
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Cormorant", "Garamond", Georgia, serif;
+  --font-sans: "Outfit", system-ui, sans-serif;
   --color-gold: #C9A84C;
   --color-gold-bright: #E8C97A;
-  --color-canvas: #080808;
-  --color-surface: #111111;
+  --color-gold-dim: #8B7430;
+  --color-canvas: #070709;
+  --color-surface: #0E0E12;
+  --color-surface-elevated: #141418;
   --color-text: #F0EDE6;
   --color-muted: #6B6B6B;
 }
 
+/* ═══════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════ */
+
 html {
-  scroll-behavior: auto; /* controlled by View Transitions */
-  background-color: #080808;
+  scroll-behavior: auto;
+  background-color: var(--color-canvas);
+  color: var(--color-text);
+}
+
+/* Film grain overlay — the tactile layer that makes flat digital feel like pressed paper */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Custom selection */
+::selection {
+  background-color: rgba(201, 168, 76, 0.3);
   color: #F0EDE6;
 }
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 168, 76, 0.2);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(201, 168, 76, 0.4);
+}
+
+/* ═══════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════ */
 
 @keyframes kenBurns {
   0%   { transform: scale(1.0) translate(0%, 0%); }
@@ -24,11 +68,147 @@ html {
 }
 
 @keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(1rem); }
+  from { opacity: 0; transform: translateY(2rem); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 @keyframes dashDraw {
   from { stroke-dashoffset: 1000; }
   to   { stroke-dashoffset: 0; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes expandLine {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes typeIn {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+
+/* Hero staggered entrance */
+@keyframes heroTitle {
+  from { opacity: 0; transform: translateY(3rem) skewY(2deg); filter: blur(8px); }
+  to   { opacity: 1; transform: translateY(0) skewY(0deg); filter: blur(0); }
+}
+
+@keyframes heroSubtitle {
+  from { opacity: 0; letter-spacing: 0.6em; }
+  to   { opacity: 1; letter-spacing: 0.3em; }
+}
+
+@keyframes heroTagline {
+  from { opacity: 0; transform: translateY(1rem); }
+  to   { opacity: 0.7; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════ */
+
+/* Gold shimmer text effect for special headings */
+.text-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--color-gold-dim) 0%,
+    var(--color-gold) 30%,
+    var(--color-gold-bright) 50%,
+    var(--color-gold) 70%,
+    var(--color-gold-dim) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s ease-in-out infinite;
+}
+
+/* Geometric corner ornaments for prestige framing */
+.frame-corners::before,
+.frame-corners::after {
+  content: "";
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: rgba(201, 168, 76, 0.2);
+  border-style: solid;
+  pointer-events: none;
+}
+.frame-corners::before {
+  top: 0;
+  left: 0;
+  border-width: 1px 0 0 1px;
+}
+.frame-corners::after {
+  bottom: 0;
+  right: 0;
+  border-width: 0 1px 1px 0;
+}
+
+/* Large corner frames for hero/feature sections */
+.frame-large::before,
+.frame-large::after {
+  content: "";
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  border-color: rgba(201, 168, 76, 0.15);
+  border-style: solid;
+  pointer-events: none;
+}
+.frame-large::before {
+  top: 2rem;
+  left: 2rem;
+  border-width: 1px 0 0 1px;
+}
+.frame-large::after {
+  bottom: 2rem;
+  right: 2rem;
+  border-width: 0 1px 1px 0;
+}
+
+/* Decorative gold line */
+.gold-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, var(--color-gold) 30%, var(--color-gold) 70%, transparent 100%);
+  opacity: 0.3;
+}
+
+/* Section divider with diamond ornament */
+.divider-diamond {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,0.2), transparent);
+}
+.divider-diamond::after {
+  content: "◆";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--color-gold);
+  font-size: 8px;
+  background: var(--color-canvas);
+  padding: 0 12px;
 }
