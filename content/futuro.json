@@ -1,0 +1,13 @@
+{
+  "pilares": [
+    { "title": "Infraestructura Digital", "descripcion": "Inversión en fibra óptica, data centers y conectividad para posicionar a Argentina como hub tecnológico regional.", "icon": "server" },
+    { "title": "Capital Humano", "descripcion": "Universidades de excelencia, atracción de talento global y formación en IA para la nueva economía.", "icon": "brain" },
+    { "title": "Regulación Inteligente", "descripcion": "Marco legal ágil y amigable para la innovación, sin burocracia que frene el desarrollo tecnológico.", "icon": "zap" }
+  ],
+  "roadmap": [
+    { "year": 2024, "hito": "Desregulación del sector tecnológico" },
+    { "year": 2025, "hito": "Primer Hub de IA del hemisferio sur" },
+    { "year": 2026, "hito": "10.000 empresas tech registradas" },
+    { "year": 2027, "hito": "4° Hub de IA del mundo" }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "stats": [
+    { "label": "Reducción del déficit fiscal", "value": 100, "unit": "%", "description": "Primer superávit en 16 años" },
+    { "label": "Inflación mensual", "value": 2.4, "unit": "%", "description": "Desde 25% en dic 2023" },
+    { "label": "Riesgo país", "value": 700, "unit": "pb", "description": "Desde 2.800 pb en dic 2023" },
+    { "label": "Reservas netas recuperadas", "value": 20, "unit": "B USD", "description": "Reconstrucción del BCRA" }
+  ],
+  "timeline": [
+    { "date": "2023-12-10", "title": "Asunción presidencial", "description": "Javier Milei asume como 57° presidente de Argentina.", "categoria": "economia" },
+    { "date": "2023-12-12", "title": "Devaluación ordenada del peso", "description": "Corrección cambiaria del 54% como primer paso de la normalización macro.", "categoria": "economia" },
+    { "date": "2024-01-01", "title": "DNU 70/2023 — Desregulación masiva", "description": "Decreto de Necesidad y Urgencia desregula más de 800 normas económicas.", "categoria": "economia" },
+    { "date": "2024-06-28", "title": "Ley Bases aprobada", "description": "El Congreso aprueba la Ley Bases y el paquete fiscal.", "categoria": "economia" },
+    { "date": "2025-01-01", "title": "Superávit fiscal 2024", "description": "Argentina logra el primer superávit primario en 16 años.", "categoria": "economia" },
+    { "date": "2025-03-01", "title": "Acuerdo con el FMI", "description": "Nuevo programa Stand-By por USD 20.000 millones.", "categoria": "economia" }
+  ]
+}
